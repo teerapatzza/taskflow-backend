@@ -96,6 +96,16 @@ CREATE TABLE IF NOT EXISTS user_settings (
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ===== TASK TOKENS (สำหรับกดอัปเดตผ่าน LINE/Email) =====
+CREATE TABLE IF NOT EXISTS task_tokens (
+  token       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id     UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  action      VARCHAR(50) DEFAULT 'mark_done',
+  is_used     BOOLEAN DEFAULT false,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ===== INDEXES =====
 CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assignee_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_assigned_by ON tasks(assigned_by_id);
@@ -104,6 +114,7 @@ CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_task_files_task ON task_files(task_id);
 CREATE INDEX IF NOT EXISTS idx_timeline_task ON task_timeline(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_tokens ON task_tokens(token);
 
 -- ===== AUTO UPDATE updated_at =====
 CREATE OR REPLACE FUNCTION update_updated_at()
